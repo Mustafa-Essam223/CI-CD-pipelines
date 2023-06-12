@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-ubuntu-slave
+  namespace: jenkins
+  labels:
+    app: jenkins-ubuntu-slave
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins-ubuntu-slave
+  template:
+    metadata:
+      labels:
+        app: jenkins-ubuntu-slave
+    spec:
+      serviceAccountName: jenkins-deployer
+      automountServiceAccountToken: true
+      securityContext:
+            fsGroup: 0 
+            runAsUser: 0
+      containers:
+      - name: jenkins-ubuntu-slave
+        image: kareemelkasaby/jenkins-slave-java-11
+        # contain ssh service, jdk-11, user&group jenkins , path /var/jenkins_home and give ownership to jenkins user
+        # expose port 22(ssh connection) these are mandatory to act as a slave to the jenkins master
+        # another dependencies for another installations
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 22
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          # equal to : docker run -v /var/run/docker.sock:/var/run/docker.sock
+
+# volume act as a bridge (has docker.socket of ec2) to avoid concept docker inside docker
+# if we run docker ps of any container grep running containers in the machine ec2
