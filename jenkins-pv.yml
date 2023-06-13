@@ -10,5 +10,4 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-  #/run/desktop/mnt/host/
-    path: "/home/mostafa/Music/JenkinsHome"
+    path: "/home/${USER}/JenkinsHome"
