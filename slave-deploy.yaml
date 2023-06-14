@@ -23,9 +23,6 @@ spec:
       containers:
       - name: jenkins-ubuntu-slave
         image: kareemelkasaby/jenkins-slave-java-11
-        # contain ssh service, jdk-11, user&group jenkins , path /var/jenkins_home and give ownership to jenkins user
-        # expose port 22(ssh connection) these are mandatory to act as a slave to the jenkins master
-        # another dependencies for another installations
         imagePullPolicy: Always
         ports:
         - containerPort: 22
@@ -36,7 +33,3 @@ spec:
       - name: docker-sock
         hostPath:
           path: /var/run/docker.sock
-          # equal to : docker run -v /var/run/docker.sock:/var/run/docker.sock
-
-# volume act as a bridge (has docker.socket of ec2) to avoid concept docker inside docker
-# if we run docker ps of any container grep running containers in the machine ec2
