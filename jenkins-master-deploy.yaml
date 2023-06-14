@@ -19,12 +19,27 @@ spec:
       securityContext:
         fsGroup: 1000 
         runAsUser: 0
+      initContainers:
+      - name: install-docker
+        image: docker:stable
+        command: ["cp", "/usr/local/bin/docker", "/data/docker"]    
+        volumeMounts:
+        - name: docker
+          mountPath: "/data"
+      - name: install-kubectl
+        image: eslamkarim/jenkins-ansible-kubectl
+        command: ["cp", "/usr/local/bin/kubectl", "/data/kubectl"]    
+        volumeMounts:
+        - name: kubectl
+          mountPath: "/data" 
       containers:
-      - image: mustafaessam/jenkinsdockerkube:v1
+      - image: jenkins/jenkins:lts-jdk11
         imagePullPolicy: IfNotPresent
         name: jenkins            
         ports:
         - containerPort: 8080
+          protocol: TCP
+        - containerPort: 50000
           protocol: TCP
         readinessProbe:
           failureThreshold: 5
@@ -39,12 +54,16 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /var/run/docker.sock
+        - mountPath: /var/run
           name: docker-sock
-        
         - name: data-disk
           mountPath: /var/jenkins_home
-        
+        - name: docker
+          subPath: "docker"
+          mountPath: "/usr/local/bin/docker"
+        - name: kubectl
+          subPath: "kubectl"
+          mountPath: "/usr/local/bin/kubectl"
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -57,3 +76,7 @@ spec:
       - name: data-disk
         persistentVolumeClaim:
           claimName: claim-jenkins
+      - name: docker
+        emptyDir: {}
+      - name: kubectl
+        emptyDir: {}
